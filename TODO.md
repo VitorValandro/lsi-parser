@@ -1,0 +1,6 @@
+- [x] formatar a saida
+- [ ] input de arquivo com entradas inválidas
+- [x] adicionar o reconhecimento dos erros (linha, coluna)
+- [ ] fazer parte B
+- [ ] escrever readme da parte A
+- [ ] escrever readme da parte B

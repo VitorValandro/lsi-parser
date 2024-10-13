@@ -1,0 +1,13 @@
+if
+else
+const
+while
+return
+%%
+123identificador
+_identificador
+#constante
+12.5
+3.14159
+identificador_especial
+1/2
