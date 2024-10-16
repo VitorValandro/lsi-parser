@@ -45,10 +45,22 @@ fn main() {
 
     let contents = fs::read_to_string(file_path).expect("Erro ao ler o arquivo");
 
-    let (keywords, inputs) = parse_file_contents(&contents);
-    let keyword_lines = keywords.len(); // Conta as linhas dos keywords
+    // Define keywords hardcoded
+    let keywords: HashSet<String> = [
+        "if".to_string(),
+        "else".to_string(),
+        "while".to_string(),
+        "return".to_string(),
+        "int".to_string(),
+        "float".to_string(),
+        "char".to_string(),
+        "void".to_string(),
+    ]
+    .iter()
+    .cloned()
+    .collect();
 
-    match tokenize(&inputs, &keywords, keyword_lines) {
+    match tokenize(&contents, &keywords) {
         Ok(tokens) => {
             // Saída do programa
             println!("Lista de Tokens:");
@@ -68,14 +80,10 @@ fn main() {
     }
 }
 
-fn tokenize(
-    input: &str,
-    keywords: &HashSet<String>,
-    keyword_lines: usize,
-) -> Result<Vec<Token>, String> {
+fn tokenize(input: &str, keywords: &HashSet<String>) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
     let mut chars = input.chars().peekable();
-    let mut line = keyword_lines + 1; // Ajusta a contagem de linhas
+    let mut line = 1;
     let mut column = 1;
 
     while let Some(&ch) = chars.peek() {
@@ -338,17 +346,4 @@ fn parse_args(args: &[String]) -> Result<&str, &str> {
     }
     let file_path = &args[1];
     Ok(file_path)
-}
-
-fn parse_file_contents(contents: &str) -> (HashSet<String>, String) {
-    let mut parts = contents.split("%%");
-    let keywords_part = parts.next().expect("Erro ao ler as palavras-chave");
-    let inputs_part = parts.next().expect("Erro ao ler os inputs");
-
-    let keywords: HashSet<String> = keywords_part
-        .lines()
-        .map(|line| line.trim().to_string())
-        .collect();
-
-    (keywords, inputs_part.to_string())
 }
