@@ -2,7 +2,7 @@
  * Analisador léxico simples para identificadores, números inteiros e operadores relacionais
  * Autores:
  * - Vitor Matheus Valandro da Rosa (22102567)
- * - Pedro Henrique Rocha (x)      
+ * - Pedro Henrique Rocha (22100918)      
  *
  * Expressões regulares:
  * - Identificador: [a-zA-Z][a-zA-Z0-9]*
@@ -74,13 +74,13 @@ fn tokenize(
     keyword_lines: usize,
 ) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
-    let mut chars = input.chars().peekable();
+    let mut chars = input.chars().peekable();  // Um iterador que pode ser espiável ex: aabb
     let mut line = keyword_lines + 1; // Ajusta a contagem de linhas
     let mut column = 1;
 
     while let Some(&ch) = chars.peek() {
         // Skip whitespace and newline characters
-        if ch.is_whitespace() {
+        if ch.is_whitespace() { // Verifica se há um espaço em branco
             if ch == '\n' {
                 line += 1;
                 column = 1;
