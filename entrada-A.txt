@@ -1,9 +1,3 @@
-if
-else
-const
-while
-return
-%%
 identificador123
 id964constante
 valido578identificador

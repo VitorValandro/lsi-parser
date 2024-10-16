@@ -1,9 +1,3 @@
-if
-else
-const
-while
-return
-%%
 123identificador
 _identificador
 #constante
