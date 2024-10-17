@@ -3,7 +3,7 @@
  * Analisador léxico simples para identificadores, números inteiros e operadores relacionais
  * Autores:
  * - Vitor Matheus Valandro da Rosa (22102567)
- * - Pedro Henrique Rocha (x)      
+ * - Pedro Henrique Nascimento Rocha (22100918)      
  *
  * Expressões regulares:
  * - Identificador: [a-zA-Z][a-zA-Z0-9]*
