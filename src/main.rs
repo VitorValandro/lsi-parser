@@ -1,8 +1,9 @@
+#![allow(dead_code, unused)]
 /**
  * Analisador léxico simples para identificadores, números inteiros e operadores relacionais
  * Autores:
  * - Vitor Matheus Valandro da Rosa (22102567)
- * - Pedro Henrique Rocha (22100918)      
+ * - Pedro Henrique Nascimento Rocha (22100918)      
  *
  * Expressões regulares:
  * - Identificador: [a-zA-Z][a-zA-Z0-9]*
@@ -60,7 +61,9 @@ fn main() {
     .cloned()
     .collect();
 
-    match tokenize(&contents, &keywords) {
+    let mut symbol_table: HashSet<String> = keywords.clone(); // Inclui keywords na tabela de símbolos
+
+    match tokenize(&contents, &keywords, &mut symbol_table) {
         Ok(tokens) => {
             // Saída do programa
             println!("Lista de Tokens:");
@@ -69,8 +72,8 @@ fn main() {
             }
 
             println!("\nTabela de Símbolos:");
-            for keyword in &keywords {
-                println!("{}", keyword);
+            for symbol in &symbol_table {
+                println!("{}", symbol);
             }
         }
         Err(error) => {
@@ -80,15 +83,19 @@ fn main() {
     }
 }
 
-fn tokenize(input: &str, keywords: &HashSet<String>) -> Result<Vec<Token>, String> {
+fn tokenize(
+    input: &str,
+    keywords: &HashSet<String>,
+    symbol_table: &mut HashSet<String>,
+) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
     let mut chars = input.chars().peekable();  // Um iterador que pode ser espiável ex: aabb
     let mut line = 1;
     let mut column = 1;
 
     while let Some(&ch) = chars.peek() {
-        // Skip whitespace and newline characters
-        if ch.is_whitespace() { // Verifica se há um espaço em branco
+        // Ignora espaços em branco e novas linhas
+        if ch.is_whitespace() {
             if ch == '\n' {
                 line += 1;
                 column = 1;
@@ -140,6 +147,10 @@ fn tokenize(input: &str, keywords: &HashSet<String>) -> Result<Vec<Token>, Strin
                         column += 1;
                     }
                 }
+            }
+            // Adiciona o identificador à tabela de símbolos
+            if let TokenType::Id = token.token_type {
+                symbol_table.insert(token.lexeme.clone());
             }
             tokens.push(token);
         } else {
@@ -324,6 +335,10 @@ fn parse_relop(chars: &mut std::iter::Peekable<std::str::Chars>) -> Option<Token
     })
 }
 
+/*
+* Parser de caractere não identificado (wildcard)
+* Consome o caractere e retorna uma mensagem de erro
+*/
 fn parse_wildcard(
     chars: &mut std::iter::Peekable<std::str::Chars>,
     line: usize,
