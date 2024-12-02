@@ -89,7 +89,7 @@ fn tokenize(
     symbol_table: &mut HashSet<String>,
 ) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
-    let mut chars = input.chars().peekable();  // Um iterador que pode ser espiável ex: aabb
+    let mut chars = input.chars().peekable(); // Um iterador que pode ser espiável ex: aabb
     let mut line = 1;
     let mut column = 1;
 
