@@ -1,14 +1,20 @@
 #![allow(dead_code, unused)]
 /**
- * Analisador léxico simples para identificadores, números inteiros e operadores relacionais
+ * Analisador léxico simples para identificadores, números inteiros, operadores relacionais,
+ * operadores aritméticos, parênteses, e strings.
  * Autores:
  * - Vitor Matheus Valandro da Rosa (22102567)
- * - Pedro Henrique Nascimento Rocha (22100918)      
+ * - Pedro Henrique Nascimento Rocha (22100918)
  *
  * Expressões regulares:
  * - Identificador: [a-zA-Z][a-zA-Z0-9]*
  * - Número inteiro: [0-9]+
  * - Operadores relacionais: ==, !=, >=, <=, >, <
+ * - Operadores aritméticos: +, -, *, /
+ * - Parênteses: (, )
+ * - Chaves: {, }
+ * - Atribuição: :=
+ * - Strings: "[^"]*"
  */
 use std::collections::HashSet;
 use std::env;
@@ -20,6 +26,13 @@ enum TokenType {
     Int,
     Relop,
     Keyword,
+    ArithOp,
+    Assign,
+    Paren,
+    StrLit,
+    Comma,
+    Bracket,
+    Semicolon,
 }
 
 #[derive(Debug)]
@@ -27,6 +40,7 @@ enum TokenValue {
     Lexeme(String),
     Number(i32),
     RelopLabel(String),
+    ArithOpLabel(String),
 }
 
 #[derive(Debug)]
@@ -50,12 +64,10 @@ fn main() {
     let keywords: HashSet<String> = [
         "if".to_string(),
         "else".to_string(),
-        "while".to_string(),
         "return".to_string(),
         "int".to_string(),
-        "float".to_string(),
-        "char".to_string(),
-        "void".to_string(),
+        "def".to_string(),
+        "num".to_string(),
     ]
     .iter()
     .cloned()
@@ -89,7 +101,7 @@ fn tokenize(
     symbol_table: &mut HashSet<String>,
 ) -> Result<Vec<Token>, String> {
     let mut tokens = Vec::new();
-    let mut chars = input.chars().peekable(); // Um iterador que pode ser espiável ex: aabb
+    let mut chars = input.chars().peekable();
     let mut line = 1;
     let mut column = 1;
 
@@ -109,34 +121,32 @@ fn tokenize(
         let mut max_token = None;
         let mut max_length = 0;
 
-        // Tenta identificar um identificador
-        let mut temp_chars = chars.clone();
-        if let Some(token) = parse_identifier(&mut temp_chars, keywords) {
-            if token.lexeme.len() > max_length {
-                max_length = token.lexeme.len();
-                max_token = Some(token);
+        // Tenta identificar diferentes tokens
+        let token_parsers: Vec<
+            fn(&mut std::iter::Peekable<std::str::Chars>, &HashSet<String>) -> Option<Token>,
+        > = vec![
+            parse_identifier,
+            parse_number,
+            parse_relop,
+            parse_arith_op,
+            parse_paren,
+            parse_assignment,
+            parse_string_literal,
+            parse_comma,
+            parse_bracket,
+            parse_semicolon,
+        ];
+
+        for parser in token_parsers {
+            let mut temp_chars = chars.clone();
+            if let Some(token) = parser(&mut temp_chars, keywords) {
+                if token.lexeme.len() > max_length {
+                    max_length = token.lexeme.len();
+                    max_token = Some(token);
+                }
             }
         }
 
-        // Tenta identificar um número
-        let mut temp_chars = chars.clone();
-        if let Some(token) = parse_number(&mut temp_chars) {
-            if token.lexeme.len() > max_length {
-                max_length = token.lexeme.len();
-                max_token = Some(token);
-            }
-        }
-
-        // Tenta identificar um operador relacional
-        let mut temp_chars = chars.clone();
-        if let Some(token) = parse_relop(&mut temp_chars) {
-            if token.lexeme.len() > max_length {
-                max_length = token.lexeme.len();
-                max_token = Some(token);
-            }
-        }
-
-        // Adiciona o token mais longo (maximal_munch) à lista de tokens
         if let Some(token) = max_token {
             for _ in 0..token.lexeme.len() {
                 if let Some(ch) = chars.next() {
@@ -148,13 +158,11 @@ fn tokenize(
                     }
                 }
             }
-            // Adiciona o identificador à tabela de símbolos
             if let TokenType::Id = token.token_type {
                 symbol_table.insert(token.lexeme.clone());
             }
             tokens.push(token);
         } else {
-            // Se nenhum token foi reconhecido, usar o wildcard parser
             if let Some(error) = parse_wildcard(&mut chars, line, column) {
                 return Err(error);
             }
@@ -222,7 +230,10 @@ fn parse_identifier(
     }
 }
 
-fn parse_number(chars: &mut std::iter::Peekable<std::str::Chars>) -> Option<Token> {
+fn parse_number(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
     let mut lexeme = String::new();
     let mut state = 0;
 
@@ -271,7 +282,10 @@ fn parse_number(chars: &mut std::iter::Peekable<std::str::Chars>) -> Option<Toke
     })
 }
 
-fn parse_relop(chars: &mut std::iter::Peekable<std::str::Chars>) -> Option<Token> {
+fn parse_relop(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
     let mut lexeme = String::new();
     let mut state = 0;
 
@@ -361,4 +375,163 @@ fn parse_args(args: &[String]) -> Result<&str, &str> {
     }
     let file_path = &args[1];
     Ok(file_path)
+}
+
+fn parse_arith_op(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    if let Some(&ch) = chars.peek() {
+        if "+-*/".contains(ch) {
+            let lexeme = ch.to_string();
+            chars.next();
+            return Some(Token {
+                token_type: TokenType::ArithOp,
+                lexeme: lexeme.clone(),
+                value: TokenValue::ArithOpLabel(lexeme),
+            });
+        }
+    }
+    None
+}
+
+fn parse_paren(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    if let Some(&ch) = chars.peek() {
+        if ch == '(' || ch == ')' {
+            let lexeme = ch.to_string();
+            chars.next();
+            return Some(Token {
+                token_type: TokenType::Paren,
+                lexeme: lexeme.clone(),
+                value: TokenValue::Lexeme(lexeme),
+            });
+        }
+    }
+    None
+}
+
+fn parse_assignment(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    let mut lexeme = String::new();
+    let mut state = 0;
+
+    while let Some(&ch) = chars.peek() {
+        match state {
+            0 => {
+                if ch == ':' {
+                    lexeme.push(ch);
+                    chars.next();
+                    state = 1;
+                } else {
+                    break;
+                }
+            }
+            1 => {
+                if ch == '=' {
+                    lexeme.push(ch);
+                    chars.next();
+                    state = 2;
+                } else {
+                    break;
+                }
+            }
+            2 => break,
+            _ => break,
+        }
+    }
+
+    if lexeme == ":=" {
+        Some(Token {
+            token_type: TokenType::Assign,
+            lexeme: lexeme.clone(),
+            value: TokenValue::Lexeme(lexeme),
+        })
+    } else {
+        None
+    }
+}
+
+fn parse_string_literal(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    let mut lexeme = String::new();
+    if let Some(&ch) = chars.peek() {
+        if ch == '"' {
+            chars.next(); // Consume opening quote
+            while let Some(&ch) = chars.peek() {
+                if ch == '"' {
+                    chars.next(); // Consume closing quote
+                    return Some(Token {
+                        token_type: TokenType::StrLit,
+                        lexeme: lexeme.clone(),
+                        value: TokenValue::Lexeme(lexeme),
+                    });
+                } else {
+                    lexeme.push(ch);
+                    chars.next();
+                }
+            }
+        }
+    }
+    None
+}
+
+fn parse_comma(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    if let Some(&ch) = chars.peek() {
+        if ch == ',' {
+            let lexeme = ch.to_string();
+            chars.next();
+            return Some(Token {
+                token_type: TokenType::Comma,
+                lexeme: lexeme.clone(),
+                value: TokenValue::Lexeme(lexeme),
+            });
+        }
+    }
+    None
+}
+
+fn parse_bracket(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    if let Some(&ch) = chars.peek() {
+        if ch == '{' || ch == '}' {
+            let lexeme = ch.to_string();
+            chars.next();
+            return Some(Token {
+                token_type: TokenType::Bracket,
+                lexeme: lexeme.clone(),
+                value: TokenValue::Lexeme(lexeme),
+            });
+        }
+    }
+    None
+}
+
+fn parse_semicolon(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    _: &HashSet<String>,
+) -> Option<Token> {
+    if let Some(&ch) = chars.peek() {
+        if ch == ';' {
+            let lexeme = ch.to_string();
+            chars.next();
+            return Some(Token {
+                token_type: TokenType::Semicolon,
+                lexeme: lexeme.clone(),
+                value: TokenValue::Lexeme(lexeme),
+            });
+        }
+    }
+    None
 }
