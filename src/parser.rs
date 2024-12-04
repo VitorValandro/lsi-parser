@@ -1,5 +1,5 @@
 use crate::ll1_table::ll1_transition_table;
-use crate::token::Token;
+use crate::token::{Terminal, Token};
 
 pub fn parse(tokens: Vec<Token>) -> Result<(), String> {
     let table = ll1_transition_table();
@@ -24,6 +24,24 @@ pub fn parse(tokens: Vec<Token>) -> Result<(), String> {
 
         let current_token = tokens.get(index).ok_or("Unexpected end of input.")?;
         println!("Current token: {:?}", current_token);
+
+        // Custom handling for `ATRIBST'`
+        if top == "ATRIBST'" {
+            if let Some(next_token) = tokens.get(index + 1) {
+                // If the next token is `(`, it is a function call.
+                if next_token.terminal == Terminal::LeftParen {
+                    println!("ATRIBST' -> FCALL");
+                    stack.extend(vec!["FCALL"].iter().rev());
+                } else {
+                    // Otherwise, assume it is an expression.
+                    println!("ATRIBST' -> EXPR");
+                    stack.extend(vec!["EXPR"].iter().rev());
+                }
+            } else {
+                return Err("Unexpected end of input while resolving ATRIBST'.".to_string());
+            }
+            continue;
+        }
 
         if let Some(rule) = table.get(&(top, current_token.terminal.clone())) {
             println!("Applying rule: {} -> {}", top, rule);
