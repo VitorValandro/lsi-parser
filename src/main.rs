@@ -9,7 +9,6 @@ mod token; // Import the token module
 
 use lexer::tokenize;
 use parser::parse;
-use token::{Terminal, Token, TokenValue};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
