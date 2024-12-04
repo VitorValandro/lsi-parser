@@ -3,18 +3,23 @@ use std::env;
 use std::fs;
 
 mod lexer; // Import the lexer module
+mod ll1_table;
+mod parser; // Import the LL(1) table // Import the parser module
+mod token; // Import the token module
 
-use lexer::{tokenize, Token};
+use lexer::tokenize;
+use parser::parse;
+use token::{Terminal, Token, TokenValue};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
     let file_path = parse_args(&args).unwrap_or_else(|err| {
-        eprintln!("Erro: {}", err);
+        eprintln!("Error: {}", err);
         std::process::exit(1);
     });
 
-    let contents = fs::read_to_string(file_path).expect("Erro ao ler o arquivo");
+    let contents = fs::read_to_string(file_path).expect("Error reading file");
 
     let keywords: HashSet<String> = [
         "if".to_string(),
@@ -32,14 +37,14 @@ fn main() {
 
     match tokenize(&contents, &keywords, &mut symbol_table) {
         Ok(tokens) => {
-            println!("Lista de Tokens:");
-            for token in tokens {
+            println!("Token List:");
+            for token in &tokens {
                 println!("{:?}", token);
             }
 
-            println!("\nTabela de Símbolos:");
-            for symbol in &symbol_table {
-                println!("{}", symbol);
+            match parse(tokens) {
+                Ok(_) => println!("Parsing successful."),
+                Err(err) => eprintln!("Parsing failed: {}", err),
             }
         }
         Err(error) => {
@@ -52,7 +57,7 @@ fn main() {
 /// Parses the program arguments to get the file path.
 fn parse_args(args: &[String]) -> Result<String, String> {
     if args.len() != 2 {
-        Err("Uso: <programa> <caminho_para_arquivo>".to_string())
+        Err("Usage: <program> <file_path>".to_string())
     } else {
         Ok(args[1].clone())
     }

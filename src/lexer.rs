@@ -20,35 +20,8 @@ use std::collections::HashSet;
 use std::env;
 use std::fs;
 
-#[derive(Debug)]
-pub enum TokenType {
-    Id,
-    Int,
-    Relop,
-    Keyword,
-    ArithOp,
-    Assign,
-    Paren,
-    StrLit,
-    Comma,
-    Bracket,
-    Semicolon,
-}
-
-#[derive(Debug)]
-pub enum TokenValue {
-    Lexeme(String),
-    Number(i32),
-    RelopLabel(String),
-    ArithOpLabel(String),
-}
-
-#[derive(Debug)]
-pub struct Token {
-    token_type: TokenType,
-    lexeme: String,
-    value: TokenValue,
-}
+use crate::token::Terminal;
+use crate::token::{Token, TokenType, TokenValue};
 
 pub fn tokenize(
     input: &str,
@@ -86,7 +59,6 @@ pub fn tokenize(
             parse_arith_op,
             parse_paren,
             parse_assignment,
-            parse_string_literal,
             parse_comma,
             parse_bracket,
             parse_semicolon,
@@ -174,13 +146,15 @@ fn parse_identifier(
         Some(Token {
             token_type: TokenType::Keyword,
             lexeme: lexeme.clone(),
-            value: TokenValue::Lexeme(lexeme),
+            value: TokenValue::Lexeme(lexeme.clone()),
+            terminal: Terminal::from_str(&lexeme)?,
         })
     } else {
         Some(Token {
             token_type: TokenType::Id,
             lexeme: lexeme.clone(),
             value: TokenValue::Lexeme(lexeme),
+            terminal: Terminal::Id,
         })
     }
 }
@@ -234,6 +208,7 @@ fn parse_number(
         token_type: TokenType::Int,
         lexeme: lexeme.clone(),
         value: TokenValue::Number(value),
+        terminal: Terminal::Num,
     })
 }
 
@@ -300,7 +275,8 @@ fn parse_relop(
     Some(Token {
         token_type: TokenType::Relop,
         lexeme: lexeme.clone(),
-        value: TokenValue::RelopLabel(relop_label),
+        value: TokenValue::RelopLabel(relop_label.clone()),
+        terminal: Terminal::from_str(&relop_label)?,
     })
 }
 
@@ -343,7 +319,8 @@ fn parse_arith_op(
             return Some(Token {
                 token_type: TokenType::ArithOp,
                 lexeme: lexeme.clone(),
-                value: TokenValue::ArithOpLabel(lexeme),
+                value: TokenValue::ArithOpLabel(lexeme.clone()),
+                terminal: Terminal::from_str(&lexeme)?,
             });
         }
     }
@@ -361,7 +338,8 @@ fn parse_paren(
             return Some(Token {
                 token_type: TokenType::Paren,
                 lexeme: lexeme.clone(),
-                value: TokenValue::Lexeme(lexeme),
+                value: TokenValue::Lexeme(lexeme.clone()),
+                terminal: Terminal::from_str(&lexeme)?,
             });
         }
     }
@@ -405,37 +383,38 @@ fn parse_assignment(
             token_type: TokenType::Assign,
             lexeme: lexeme.clone(),
             value: TokenValue::Lexeme(lexeme),
+            terminal: Terminal::Equals,
         })
     } else {
         None
     }
 }
 
-fn parse_string_literal(
-    chars: &mut std::iter::Peekable<std::str::Chars>,
-    _: &HashSet<String>,
-) -> Option<Token> {
-    let mut lexeme = String::new();
-    if let Some(&ch) = chars.peek() {
-        if ch == '"' {
-            chars.next(); // Consume opening quote
-            while let Some(&ch) = chars.peek() {
-                if ch == '"' {
-                    chars.next(); // Consume closing quote
-                    return Some(Token {
-                        token_type: TokenType::StrLit,
-                        lexeme: lexeme.clone(),
-                        value: TokenValue::Lexeme(lexeme),
-                    });
-                } else {
-                    lexeme.push(ch);
-                    chars.next();
-                }
-            }
-        }
-    }
-    None
-}
+// fn parse_string_literal(
+//     chars: &mut std::iter::Peekable<std::str::Chars>,
+//     _: &HashSet<String>,
+// ) -> Option<Token> {
+//     let mut lexeme = String::new();
+//     if let Some(&ch) = chars.peek() {
+//         if ch == '"' {
+//             chars.next(); // Consume opening quote
+//             while let Some(&ch) = chars.peek() {
+//                 if ch == '"' {
+//                     chars.next(); // Consume closing quote
+//                     return Some(Token {
+//                         token_type: TokenType::Ep,
+//                         lexeme: lexeme.clone(),
+//                         value: TokenValue::Lexeme(lexeme),
+//                     });
+//                 } else {
+//                     lexeme.push(ch);
+//                     chars.next();
+//                 }
+//             }
+//         }
+//     }
+//     None
+// }
 
 fn parse_comma(
     chars: &mut std::iter::Peekable<std::str::Chars>,
@@ -449,6 +428,7 @@ fn parse_comma(
                 token_type: TokenType::Comma,
                 lexeme: lexeme.clone(),
                 value: TokenValue::Lexeme(lexeme),
+                terminal: Terminal::Comma,
             });
         }
     }
@@ -466,7 +446,8 @@ fn parse_bracket(
             return Some(Token {
                 token_type: TokenType::Bracket,
                 lexeme: lexeme.clone(),
-                value: TokenValue::Lexeme(lexeme),
+                value: TokenValue::Lexeme(lexeme.clone()),
+                terminal: Terminal::from_str(&lexeme)?,
             });
         }
     }
@@ -485,6 +466,7 @@ fn parse_semicolon(
                 token_type: TokenType::Semicolon,
                 lexeme: lexeme.clone(),
                 value: TokenValue::Lexeme(lexeme),
+                terminal: Terminal::Semicolon,
             });
         }
     }
