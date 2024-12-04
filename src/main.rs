@@ -27,6 +27,7 @@ fn main() {
         "int".to_string(),
         "def".to_string(),
         "num".to_string(),
+        "print".to_string(),
     ]
     .iter()
     .cloned()

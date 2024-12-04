@@ -92,6 +92,7 @@ pub fn ll1_transition_table() -> HashMap<(&'static str, Terminal), &'static str>
     table.insert(("IFSTMT'", Terminal::If), "ε");
     table.insert(("IFSTMT'", Terminal::LeftBrace), "ε");
     table.insert(("IFSTMT'", Terminal::Semicolon), "ε");
+    table.insert(("IFSTMT'", Terminal::RightBrace), "ε");
     table.insert(("IFSTMT'", Terminal::DollarSign), "ε");
 
     // STMTLIST
@@ -126,6 +127,7 @@ pub fn ll1_transition_table() -> HashMap<(&'static str, Terminal), &'static str>
     table.insert(("EXPR'", Terminal::Equal), "== NUMEXPR");
     table.insert(("EXPR'", Terminal::NotEqual), "<> NUMEXPR");
     table.insert(("EXPR'", Terminal::Semicolon), "ε");
+    table.insert(("EXPR'", Terminal::RightParen), "ε");
 
     // NUMEXPR
     table.insert(("NUMEXPR", Terminal::Num), "TERM NUMEXPR'");
@@ -142,6 +144,7 @@ pub fn ll1_transition_table() -> HashMap<(&'static str, Terminal), &'static str>
     table.insert(("NUMEXPR'", Terminal::Equal), "ε");
     table.insert(("NUMEXPR'", Terminal::NotEqual), "ε");
     table.insert(("NUMEXPR'", Terminal::Semicolon), "ε");
+    table.insert(("NUMEXPR'", Terminal::RightParen), "ε");
 
     // TERM
     table.insert(("TERM", Terminal::Num), "FACT TERM'");
@@ -160,6 +163,7 @@ pub fn ll1_transition_table() -> HashMap<(&'static str, Terminal), &'static str>
     table.insert(("TERM'", Terminal::Equal), "ε");
     table.insert(("TERM'", Terminal::NotEqual), "ε");
     table.insert(("TERM'", Terminal::Semicolon), "ε");
+    table.insert(("TERM'", Terminal::RightParen), "ε");
 
     // FACT
     table.insert(("FACT", Terminal::Num), "num");

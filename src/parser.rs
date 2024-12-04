@@ -22,19 +22,44 @@ pub fn parse(tokens: Vec<Token>) -> Result<(), String> {
             }
         }
 
-        let current_token = tokens.get(index).ok_or("Unexpected end of input.")?;
+        let current_token = tokens.get(index);
+
+        // Handle end of input
+        if current_token.is_none() {
+            if let Some(rule) = table.get(&(top, Terminal::DollarSign)) {
+                println!("Applying epsilon transition for {}", top);
+                if *rule != "ε" {
+                    stack.extend(rule.split_whitespace().rev());
+                }
+                continue;
+            } else {
+                return Err(format!(
+                    "Parsing failed: unexpected remaining symbol `{}` in stack.",
+                    top
+                ));
+            }
+        }
+
+        let current_token = current_token.unwrap();
         println!("Current token: {:?}", current_token);
+
+        // Custom handling for `IFSTMT'`
+        if top == "IFSTMT'" {
+            if current_token.terminal == Terminal::Else {
+                println!("Handling `else` branch for IFSTMT'");
+                stack.extend(vec!["else", "STMT"].iter().rev());
+            } else {
+                println!("Applying epsilon transition for IFSTMT' (no else branch)");
+            }
+            continue;
+        }
 
         // Custom handling for `ATRIBST'`
         if top == "ATRIBST'" {
             if let Some(next_token) = tokens.get(index + 1) {
-                // If the next token is `(`, it is a function call.
                 if next_token.terminal == Terminal::LeftParen {
-                    println!("ATRIBST' -> FCALL");
                     stack.extend(vec!["FCALL"].iter().rev());
                 } else {
-                    // Otherwise, assume it is an expression.
-                    println!("ATRIBST' -> EXPR");
                     stack.extend(vec!["EXPR"].iter().rev());
                 }
             } else {
@@ -66,6 +91,6 @@ pub fn parse(tokens: Vec<Token>) -> Result<(), String> {
         }
     }
 
-    println!("Stack exhausted without matching input.");
-    Err("Stack exhausted without matching input.".to_string())
+    println!("Parsing completed.");
+    Ok(())
 }
