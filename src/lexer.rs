@@ -276,7 +276,7 @@ fn parse_relop(
         token_type: TokenType::Relop,
         lexeme: lexeme.clone(),
         value: TokenValue::RelopLabel(relop_label.clone()),
-        terminal: Terminal::from_str(&relop_label)?,
+        terminal: Terminal::from_str(&lexeme)?,
     })
 }
 
@@ -389,32 +389,6 @@ fn parse_assignment(
         None
     }
 }
-
-// fn parse_string_literal(
-//     chars: &mut std::iter::Peekable<std::str::Chars>,
-//     _: &HashSet<String>,
-// ) -> Option<Token> {
-//     let mut lexeme = String::new();
-//     if let Some(&ch) = chars.peek() {
-//         if ch == '"' {
-//             chars.next(); // Consume opening quote
-//             while let Some(&ch) = chars.peek() {
-//                 if ch == '"' {
-//                     chars.next(); // Consume closing quote
-//                     return Some(Token {
-//                         token_type: TokenType::Ep,
-//                         lexeme: lexeme.clone(),
-//                         value: TokenValue::Lexeme(lexeme),
-//                     });
-//                 } else {
-//                     lexeme.push(ch);
-//                     chars.next();
-//                 }
-//             }
-//         }
-//     }
-//     None
-// }
 
 fn parse_comma(
     chars: &mut std::iter::Peekable<std::str::Chars>,

@@ -1,7 +1,8 @@
-def func1(int A, int B) {
-    int C, D, R;
-    C := A + B;
-    D := A + B * C;
-    R := C - D;
-    return R;
+def principal() {
+    int X, Y, R;
+    X := 4;
+    Y := 5;
+    R := func1(X, Y);
+    print R;
+    return;
 }
