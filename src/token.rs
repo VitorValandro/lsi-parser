@@ -7,7 +7,6 @@ pub enum TokenType {
     ArithOp,
     Assign,
     Paren,
-    StrLit,
     Comma,
     Bracket,
     Semicolon,
@@ -119,7 +118,6 @@ pub enum TokenValue {
     Number(i32),          // Numeric value
     RelopLabel(String),   // Relational operator label (e.g., <, >)
     ArithOpLabel(String), // Arithmetic operator label (e.g., +, *)
-    None,                 // For tokens with no additional value
 }
 
 /// Struct for tokens used during parsing.
