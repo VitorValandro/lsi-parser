@@ -1,3 +1,8 @@
+/// Gera a tabela de transição LL(1) para um analisador sintático.
+///
+/// Retorna um `HashMap` onde a chave é uma tupla contendo um `&'static str` representando
+/// o estado atual e um `Terminal` representando o terminal atual, e o valor é um `&'static str`
+/// representando a produção correspondente.
 use std::collections::HashMap;
 
 use crate::token::Terminal;

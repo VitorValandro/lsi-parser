@@ -1,21 +1,7 @@
 #![allow(dead_code, unused)]
-/**
- * Analisador léxico simples para identificadores, números inteiros, operadores relacionais,
- * operadores aritméticos, parênteses, e strings.
- * Autores:
- * - Vitor Matheus Valandro da Rosa (22102567)
- * - Pedro Henrique Nascimento Rocha (22100918)
- *
- * Expressões regulares:
- * - Identificador: [a-zA-Z][a-zA-Z0-9]*
- * - Número inteiro: [0-9]+
- * - Operadores relacionais: ==, !=, >=, <=, >, <
- * - Operadores aritméticos: +, -, *, /
- * - Parênteses: (, )
- * - Chaves: {, }
- * - Atribuição: :=
- * - Strings: "[^"]*"
- */
+/// Lexer para a linguagem LSI-2024-2
+/// Tokeniza a entrada fornecida em uma sequência de tokens.
+/// Prepara o input para a análise sintática.
 use std::collections::HashSet;
 use std::env;
 use std::fs;

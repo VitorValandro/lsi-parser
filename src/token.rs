@@ -1,4 +1,5 @@
 #[derive(Debug)]
+/// Esse arquivo contém os tipos, structs e implementações usadas para representar tokens e terminais.
 pub enum TokenType {
     Id,
     Int,
@@ -12,7 +13,7 @@ pub enum TokenType {
     Semicolon,
 }
 
-/// Enum for token types that reflect the grammar's requirements.
+/// Enum para tipos de token que refletem os requisitos da gramática.
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Terminal {
     Int,
@@ -41,7 +42,7 @@ pub enum Terminal {
     NotEqual,     // <>
     Else,         // else
     DollarSign,   // $
-    Epsilon,      // ε (empty production)
+    Epsilon,      // ε
 }
 
 impl Terminal {
@@ -111,20 +112,21 @@ impl Terminal {
     }
 }
 
-/// Enum for token values with variants for different data types.
+/// Enum para valores de token com variantes para diferentes tipos de dados.
 #[derive(Debug)]
 pub enum TokenValue {
-    Lexeme(String),       // General lexeme (e.g., variable names)
-    Number(i32),          // Numeric value
-    RelopLabel(String),   // Relational operator label (e.g., <, >)
-    ArithOpLabel(String), // Arithmetic operator label (e.g., +, *)
+    Lexeme(String),       // Lexema geral (e.g. nome de variável)
+    Number(i32),          // Valor numérico
+    RelopLabel(String),   // Operadores relacionais (e.g., <, >)
+    ArithOpLabel(String), // Operadores aritméticos (e.g., +, -)
 }
 
-/// Struct for tokens used during parsing.
+/// Struct para tokens usados durante a análise.
+/// Tokens são gerados na análise léxica e repassados para a análise sintática
 #[derive(Debug)]
 pub struct Token {
-    pub token_type: TokenType, // The type of the token
-    pub lexeme: String,        // The actual lexeme (source code text)
-    pub value: TokenValue,     // Associated value, if applicable
-    pub terminal: Terminal,    // The terminal symbol
+    pub token_type: TokenType, // O tipo de token
+    pub lexeme: String,        // O lexema associado (a string literal)
+    pub value: TokenValue,     // O valor associado (se houver)
+    pub terminal: Terminal,    // O símbolo terminal que será usado na análise sintática
 }

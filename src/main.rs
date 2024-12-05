@@ -1,11 +1,18 @@
 use std::collections::HashSet;
 use std::env;
 use std::fs;
-
-mod lexer; // Import the lexer module
+/**
+ * T3 de compiladores: Parser preditivo
+ * Esse programa é um analisador sintático que implementa um parser preditivo para a linguagem de programação LSI-2024-2.
+ * O programa lê um arquivo de entrada contendo um programa escrito na linguagem LSI-2024-2 e verifica se o programa está léxica e sintaticamente correto.
+ * Autores:
+ * - Vitor Matheus Valandro da Rosa (22102567)
+ * - Pedro Henrique Nascimento Rocha (22100918)
+ */
+mod lexer;
 mod ll1_table;
-mod parser; // Import the LL(1) table // Import the parser module
-mod token; // Import the token module
+mod parser;
+mod token;
 
 use lexer::tokenize;
 use parser::parse;
@@ -18,7 +25,7 @@ fn main() {
         std::process::exit(1);
     });
 
-    let contents = fs::read_to_string(file_path).expect("Error reading file");
+    let contents = fs::read_to_string(file_path).expect("Erro ao ler arquivo");
 
     let keywords: HashSet<String> = [
         "if".to_string(),
@@ -37,14 +44,14 @@ fn main() {
 
     match tokenize(&contents, &keywords, &mut symbol_table) {
         Ok(tokens) => {
-            println!("Token List:");
+            println!("Lista de tokens:");
             for token in &tokens {
                 println!("{:?}", token);
             }
 
             match parse(tokens) {
-                Ok(_) => println!("Parsing successful."),
-                Err(err) => eprintln!("Parsing failed: {}", err),
+                Ok(message) => println!("{}", message),
+                Err(err) => eprintln!("\nParsing falhou: {}", err),
             }
         }
         Err(error) => {
@@ -54,11 +61,10 @@ fn main() {
     }
 }
 
-/// Parses the program arguments to get the file path.
-fn parse_args(args: &[String]) -> Result<String, String> {
+fn parse_args(args: &[String]) -> Result<&str, &str> {
     if args.len() != 2 {
-        Err("Usage: <program> <file_path>".to_string())
-    } else {
-        Ok(args[1].clone())
+        return Err("O caminho do arquivo de entrada deve ser fornecido como argumento. Por exemplo: cargo run entrada.txt");
     }
+    let file_path = &args[1];
+    Ok(file_path)
 }
