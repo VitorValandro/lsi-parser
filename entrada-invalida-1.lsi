@@ -1,0 +1,45 @@
+def calculaAreaRetangulo(int Base, int Altura) {
+    int Area;
+    Area := Base * Altura;
+    if (Base < 0) {
+        print 0;
+        return;
+    }
+    if (Altura < 0) {
+        print 0;
+        return;
+    }
+
+    return; 
+}
+
+def verificaMaior(int A, int B) {
+    if (A > B) {
+        print A;
+    } else {
+        print B;
+    }
+    return;
+}
+
+def principal() {
+    int Lado1, Lado2, MaiorLado, Area;
+    Lado1 := 7;
+    Lado2 := 0;
+
+    if (Lado1 < 0) {
+        print 0;
+        return;
+    }
+
+    Area := calculaAreaRetangulo(Lado1, Lado2);
+    MaiorLado := verificaMaior(Lado1 Lado2); 
+
+    if (Area == 0) {
+        print 0;
+    } else {
+        print Area;
+    }
+
+    return;
+}
